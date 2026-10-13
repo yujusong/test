@@ -1,0 +1,19 @@
+name: Materialize lunch roulette source
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container: node:22-bookworm
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract source and publish with Git
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tar -xzf lunch-roulette-source.tar.gz
+          git add lunch-roulette
+          git -c user.name=YujuSong -c user.email=yuju.song35@gmail.com commit -m "Add Docker lunch roulette, Supabase votes and Vercel gateway" || test -z "$(git status --porcelain)"
+          git push origin HEAD:main
