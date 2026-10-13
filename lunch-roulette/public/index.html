@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f95f38"><title>오늘 뭐 먹지? · 점심 룰렛</title><link rel="stylesheet" href="/style.css"><script src="/script.js" defer></script></head>
+<body>
+<header><a class="brand" href="/">🍴 점심클럽<span>LUNCH CLUB</span></a><div class="session"><i></i><span id="timer">연결 중</span></div></header>
+<main>
+<section class="intro"><div class="eyebrow">매일 하는 고민, 오늘은 가볍게.</div><h1>오늘 <span>뭐 먹지?</span></h1><p>고민은 룰렛에게. 맛있는 결정은 우리에게.</p></section>
+<div class="layout">
+<section class="roulette card" aria-label="점심 메뉴 룰렛"><div class="card-heading"><span class="tag">오늘의 한 끼</span><span id="candidate-count">6가지 후보</span></div><div class="wheel-stage"><div class="pointer" aria-hidden="true"></div><canvas id="wheel" width="720" height="720" role="img" aria-label="점심 메뉴 룰렛"></canvas><div class="wheel-hub" aria-hidden="true">🍴</div></div><button class="spin primary" id="spin">오늘의 점심 뽑기 <span>↗</span></button><p class="hint">딱 3초면, 오늘 점심 고민 끝!</p><div id="result" class="result" aria-live="polite"><span class="result-label">오늘의 점심은?</span><h2 id="result-menu">두근두근, 돌려볼까요?</h2><p id="result-description">마음에 드는 메뉴가 나오면 투표해 주세요.</p><button id="vote" class="primary" hidden>이걸로 결정! 🙌</button><a id="restaurant" target="_blank" rel="noopener noreferrer" hidden>근처 식당 찾아보기 ↗</a></div></section>
+<aside>
+<section class="card candidates"><div class="section-title"><h2>룰렛에 담을 메뉴</h2><button class="text-button" id="reset">기본 메뉴</button></div><p class="small">취향대로 고르고, 새로운 메뉴도 담아보세요.</p><div id="presets" class="filters" aria-label="메뉴 필터"><button data-filter="all" class="selected">전체</button><button data-filter="soup">국물 당기는 날</button><button data-filter="light">가볍게 먹기</button></div><ul id="menus" class="menu-list"></ul><form id="add-form"><label class="sr-only" for="new-menu">추가할 메뉴</label><input id="new-menu" placeholder="먹고 싶은 메뉴 추가" maxlength="20" required><button type="submit" aria-label="메뉴 추가">＋</button></form><p class="small" id="menu-note">최대 12개까지 · 모든 후보의 확률은 같아요.</p></section>
+<section class="card ranking"><div class="section-title"><h2>오늘의 인기 TOP 5</h2><span class="tag pale">팀 투표</span></div><form id="team-form"><label for="team">우리 팀</label><input id="team" maxlength="24" value="우리팀" required><button type="submit">입장</button></form><p id="ranking-mode" class="small">컨테이너에 연결된 모든 브라우저의 투표를 모아요.</p><ol id="top"></ol><button id="refresh" class="text-button">순위 새로고침 ↻</button></section>
+</aside></div>
+<section class="share card"><div><div class="eyebrow">함께 고르면 더 맛있으니까</div><h2>점심 메이트를 초대해요</h2><p>팀 이름이 담긴 링크로 같은 순위에 투표하세요.</p><button id="share">초대 링크 복사 ↗</button></div><img id="qr" alt="현재 팀 초대 링크 QR 코드" width="120" height="120"></section>
+<footer><span>작은 선택, 맛있는 하루. 🍊</span><span>실습 세션 · 시작 후 1시간 자동 종료</span></footer>
+</main><div id="toast" role="status" aria-live="polite"></div><div id="confetti" aria-hidden="true"></div>
+</body></html>

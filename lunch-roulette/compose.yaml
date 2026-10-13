@@ -1,0 +1,27 @@
+services:
+  lunch:
+    build: .
+    container_name: lunch-roulette
+    ports:
+      - "127.0.0.1:18081:8080"
+    environment:
+      ENABLE_TUNNEL: ${ENABLE_TUNNEL:-0}
+      SESSION_SECONDS: ${SESSION_SECONDS:-3600}
+      SESSION_EXPIRES_AT: ${SESSION_EXPIRES_AT:-}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
+      SUPABASE_SESSION_ID: ${SUPABASE_SESSION_ID:-}
+    volumes:
+      - lunch-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    mem_limit: 128m
+    cpus: 0.5
+volumes:
+  lunch-data:
