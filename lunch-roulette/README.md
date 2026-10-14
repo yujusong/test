@@ -1,8 +1,12 @@
 # 오늘 뭐 먹지? — 점심클럽
 
-현재 상태: Docker 로컬 및 무료 임시 터널 접속 검증 완료. 기존 Supabase Free
-프로젝트의 실제 투표 저장과 공유 순위를 검증했습니다. GitHub 업로드와 Vercel
-배포는 Chrome 확장 프로그램의 파일 업로드 권한 설정을 기다리고 있습니다.
+현재 상태: GitHub 소스 업로드와 Vercel Hobby 배포 완료. 기존 Supabase Free
+프로젝트에 실제 투표를 저장합니다. 개발 도구와 실행 서버는 Docker 안에 있습니다.
+
+공개 주소: https://lunch-roulette-theta-one.vercel.app
+소스: https://github.com/yujusong/test/tree/main/lunch-roulette
+현재 실습 종료: 2026-10-14 20:57:48 (한국 시간).
+공개 서비스 사용 중에는 이 컴퓨터와 Docker를 켜두어야 합니다.
 
 ## 실행과 종료
 
@@ -22,7 +26,8 @@ docker compose up -d --build
 docker compose down
 ```
 
-투표는 Docker named volume에 보관되며 컨테이너를 재시작해도 남습니다.
+SQLite 모드의 투표는 Docker named volume에, 현재 Supabase 모드의 투표는
+Supabase에 보관되며 컨테이너를 종료해도 데이터는 남습니다.
 컨테이너를 종료하면 HTTP 서비스는 실행되지 않습니다. 종료 전 열린 화면은
 최대 30초 내 연결 종료를 감지해 버튼을 비활성화합니다.
 
@@ -71,12 +76,12 @@ Docker 서버의 HTTPS 공개 원본은 Cloudflare Quick Tunnel로 제공합니�
 게이트웨이가 410을 반환합니다. 정적 페이지를 Vercel에 독립 배포하면
 컨테이너 종료와 무관하게 실행되므로 이 요구사항을 만족하지 않습니다.
 
-게이트웨이는 아직 Vercel에서 검증되지 않았습니다. 실제 연동 시 Hobby/Free
-플랜 확인, HTTPS 원본 준비, 배포, 두 브라우저 공유 순위 확인, 컨테이너 종료
-후 클라우드 접근 차단 확인까지 수행해야 합니다. 410 반환은 Vercel 프로젝트
-자체의 Pause와 다릅니다. 사용량 자체를 멈추려면 종료 시 Pause도 연동해야 합니다.
-Vercel에는 아직 프로젝트를 배포하지 않았습니다. 기존 Supabase 프로젝트에
-점심용 테이블·RPC·한시적 세션을 생성했고 새 유료 리소스나 플랜 변경은 없습니다.
+Vercel 프로젝트는 GitHub의 main 브랜치와 연결되어 자동 배포됩니다.
+종료 시각에 컨테이너 서버와 터널이 종료되고, 게이트웨이가 서비스 요청을 차단합니다.
+Vercel 프로젝트와 Supabase 저장 데이터는 남습니다. 유료 리소스 생성이나
+플랜 변경은 하지 않았습니다. 다시 실습하려면 DB 세션 만료 시각과 로컬 .env를
+갱신하고 컨테이너를 시작한 뒤, 새 원본 주소와 종료 시각을 Vercel 환경변수에
+반영하여 재배포합니다. .env는 GitHub에 올리지 않습니다.
 
 ## 검증
 
