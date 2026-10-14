@@ -15,7 +15,12 @@ def call(path, payload=None, key=None):
         with urlopen(req, timeout=10) as response:
             return response.status, json.load(response)
     except HTTPError as exc:
-        return exc.code, json.load(exc)
+        body = exc.read()
+        try:
+            result = json.loads(body)
+        except (ValueError, UnicodeDecodeError):
+            result = {'error': body.decode('utf-8', errors='replace')}
+        return exc.code, result
 
 status, session = call('/api/session')
 assert status == 200 and session['expiresAt'] > session['serverTime']
@@ -29,6 +34,6 @@ assert call('/api/vote', vote, session['sessionKey'])[0] == 409
 status, result = call('/api/top?team=' + team)
 assert status == 200 and result['rows'] == [{'menu':'김치찌개', 'count':1}]
 assert call('/api/top?team=' + team + '-other')[1]['rows'] == []
-assert call('/../server.py')[0] == 404
+assert call('/../server.py')[0] in (400, 404)  # Vercel rejects traversal before the app.
 assert call('/api/qr?url=bad')[0] == 400
 print('PASS: session expiry metadata, invalid input, request token, vote persistence, duplicate protection, team isolation, static path allowlist, QR input validation')
