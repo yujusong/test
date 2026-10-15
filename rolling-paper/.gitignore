@@ -1,0 +1,5 @@
+.env
+*.local.sql
+artifacts/
+__pycache__/
+.vercel/

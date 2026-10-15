@@ -1,0 +1,9 @@
+.env
+*.local.sql
+artifacts
+tests
+cloud
+supabase
+tools
+.git
+__pycache__

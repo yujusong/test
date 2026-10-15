@@ -1,0 +1,6 @@
+{
+  "name": "rolling-paper-gateway",
+  "private": true,
+  "description": "Forwards requests to the live Docker container; serves nothing on its own.",
+  "engines": { "node": "22.x" }
+}

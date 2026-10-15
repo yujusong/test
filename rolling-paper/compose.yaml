@@ -1,0 +1,60 @@
+name: rolling-paper
+
+services:
+  # 실제 서비스: 이 컨테이너가 꺼지면 웹서비스도 꺼집니다.
+  paper:
+    build: .
+    container_name: rolling-paper
+    ports:
+      - "127.0.0.1:18082:8080"
+    environment:
+      ENABLE_TUNNEL: ${ENABLE_TUNNEL:-0}
+      SESSION_SECONDS: ${SESSION_SECONDS:-3600}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
+      BOOTSTRAP_SECRET: ${BOOTSTRAP_SECRET:-}
+    volumes:
+      - paper-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"
+    stop_grace_period: 15s
+    mem_limit: 192m
+    cpus: 0.5
+
+  # 개발 도구(git, GitHub CLI, Vercel CLI)도 컨테이너 안에서만 사용합니다.
+  tools:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile.tools
+    working_dir: /work
+    volumes:
+      - .:/src:ro
+      - tools-home:/root
+      - repo:/work
+    restart: "no"
+
+  # 화면 자동 검증용 headless 브라우저
+  qa:
+    profiles: ["qa"]
+    build:
+      context: .
+      dockerfile: Dockerfile.qa
+    working_dir: /tests
+    volumes:
+      - ./tests:/tests:ro
+      - ./artifacts:/artifacts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: "no"
+
+volumes:
+  paper-data:
+  tools-home:
+  repo:

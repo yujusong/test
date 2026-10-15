@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#b98450">
+  <meta name="description" content="링크 하나로 모두가 포스트잇을 붙이고, 마감 시간에 한 번에 공개하는 실시간 롤링페이퍼">
+  <title>우리 팀 롤링페이퍼</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div id="banner" class="banner" role="status" hidden></div>
+
+  <div id="loading" class="loading" aria-live="polite"><span class="spinner" aria-hidden="true"></span>보드를 준비하고 있어요…</div>
+
+  <!-- 처음 화면: 보드 만들기 -->
+  <main id="home" class="home" hidden>
+    <header class="hero">
+      <p class="eyebrow">0원 클라우드 실습 · 실시간 롤링페이퍼</p>
+      <h1>우리 팀 <em>롤링페이퍼</em></h1>
+      <p class="lead">링크 하나로 모두가 포스트잇을 붙이고,<br>마감 시간이 되면 한 번에 짠! 공개해요.</p>
+      <div class="hero-art" aria-hidden="true">
+        <span class="mini c-yellow">생일 축하해요!<b>- 민지</b></span>
+        <span class="mini c-pink">늘 고마워요<b>- 익명</b></span>
+        <span class="mini c-mint">올해도 파이팅<b>- 준호</b></span>
+        <span class="mini c-blue polaroidish">📸<b>사진도 붙여요</b></span>
+      </div>
+    </header>
+
+    <form id="create" class="card create" novalidate>
+      <h2>새 롤링페이퍼 만들기</h2>
+      <fieldset class="theme-pick">
+        <legend>어떤 날인가요?</legend>
+        <div id="theme-list" class="chip-row"></div>
+      </fieldset>
+      <div class="two">
+        <label>주인공 <span class="opt">(선택)</span>
+          <input name="recipient" maxlength="20" autocomplete="off" placeholder="예: 지수">
+        </label>
+        <label>보드 제목
+          <input name="title" maxlength="40" required autocomplete="off" placeholder="지수님 생일 축하해요!">
+        </label>
+      </div>
+      <fieldset>
+        <legend>작성 마감</legend>
+        <div id="deadline-list" class="chip-row"></div>
+        <input type="datetime-local" name="custom" class="custom-deadline" hidden aria-label="마감 시각 직접 입력">
+        <p id="deadline-hint" class="hint"></p>
+      </fieldset>
+      <label class="switch">
+        <input type="checkbox" name="secret">
+        <span class="knob" aria-hidden="true"></span>
+        <span><strong>🤫 비밀 모드</strong><small>마감 전까지 다른 사람 글은 접혀 있다가, 마감 순간 한꺼번에 공개돼요. 몰래 준비하는 생일 축하에 딱!</small></span>
+      </label>
+      <p id="create-error" class="error" role="alert" hidden></p>
+      <button class="primary big" type="submit">보드 만들기 →</button>
+    </form>
+
+    <section id="recent" class="card recent" hidden>
+      <h2>최근에 연 보드</h2>
+      <ul id="recent-list"></ul>
+    </section>
+
+    <section class="card steps" aria-label="사용 방법">
+      <ol>
+        <li><b>1</b><span><strong>만들기</strong>테마와 마감 시간을 정해요</span></li>
+        <li><b>2</b><span><strong>초대하기</strong>링크·QR로 팀원을 불러요</span></li>
+        <li><b>3</b><span><strong>붙이기</strong>글·사진·하트가 실시간으로 붙어요</span></li>
+        <li><b>4</b><span><strong>공개하기</strong>마감되면 공개 모드로 함께 봐요</span></li>
+      </ol>
+    </section>
+  </main>
+
+  <!-- 보드 화면 -->
+  <main id="board" class="board-view" hidden>
+    <header class="board-head">
+      <div class="head-top">
+        <a class="back" href="./" aria-label="처음 화면으로">←</a>
+        <span id="theme-emoji" class="theme-emoji" aria-hidden="true"></span>
+        <div class="title-wrap">
+          <h1 id="board-title"></h1>
+          <p id="board-sub"></p>
+        </div>
+      </div>
+      <div class="chips">
+        <span id="countdown" class="chip countdown"></span>
+        <span id="stats" class="chip"></span>
+        <span id="viewers" class="chip live" hidden></span>
+        <span id="typing" class="chip typing" hidden></span>
+      </div>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="정렬과 보기">
+          <button type="button" data-sort="new" aria-pressed="true">최신순</button>
+          <button type="button" data-sort="hearts" aria-pressed="false">하트순</button>
+          <button type="button" data-sort="photos" aria-pressed="false">사진만</button>
+        </div>
+        <div class="tool-buttons">
+          <button type="button" class="ghost" data-open="show">🎬 공개 모드</button>
+          <button type="button" class="ghost" data-open="invite">📨 초대하기</button>
+          <button type="button" class="ghost" data-open="admin" id="admin-btn" hidden>🛠 관리</button>
+        </div>
+      </div>
+    </header>
+
+    <p id="secret-note" class="secret-note" hidden></p>
+
+    <div class="layout">
+      <section id="wall" class="wall" aria-label="포스트잇 보드"></section>
+
+      <aside id="composer" class="composer" aria-label="포스트잇 쓰기">
+        <button type="button" class="sheet-close" aria-label="닫기">✕</button>
+        <form id="note-form" novalidate>
+          <h2>포스트잇 남기기</h2>
+          <div class="preview-wrap" aria-hidden="true">
+            <article id="preview" class="note c-yellow f-pen preview">
+              <span class="sticker"></span>
+              <div class="polaroid" hidden><img alt=""></div>
+              <p class="msg">여기에 마음을 적어 주세요</p>
+              <p class="by">- 익명</p>
+            </article>
+          </div>
+          <div class="field-row">
+            <label class="grow">닉네임
+              <input name="author" maxlength="12" autocomplete="nickname" placeholder="비우면 익명">
+            </label>
+          </div>
+          <label>메시지 <span id="counter" class="counter">0/100</span>
+            <textarea name="message" maxlength="100" rows="3" required placeholder="따뜻한 한마디를 남겨 주세요"></textarea>
+          </label>
+          <button type="button" id="idea" class="ghost small">🎲 문구 아이디어</button>
+          <fieldset class="pick">
+            <legend>색깔</legend>
+            <div class="swatches" id="colors"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>스티커</legend>
+            <div class="stickers" id="stickers"></div>
+          </fieldset>
+          <fieldset class="pick">
+            <legend>글씨체</legend>
+            <div class="chip-row" id="fonts"></div>
+          </fieldset>
+          <div class="photo-row">
+            <label class="ghost photo-btn">📷 사진 붙이기
+              <input id="photo" type="file" accept="image/*">
+            </label>
+            <button type="button" id="photo-clear" class="link" hidden>사진 빼기</button>
+            <span id="photo-info" class="hint"></span>
+          </div>
+          <p id="note-error" class="error" role="alert" hidden></p>
+          <button class="primary big" id="submit" type="submit">붙이기 📌</button>
+        </form>
+        <div id="locked" class="locked" hidden>
+          <p class="big-emoji">🔒</p>
+          <p><strong>작성이 마감되었어요</strong><br>이제 공개 모드로 함께 읽어 보세요!</p>
+          <button type="button" class="primary" data-open="show">🎬 공개 모드 열기</button>
+        </div>
+      </aside>
+    </div>
+
+    <button type="button" id="fab" class="fab">✍️ 남기기</button>
+    <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
+
+    <nav class="tabbar" aria-label="빠른 메뉴">
+      <button type="button" data-tab="top"><span>🏠</span>보드</button>
+      <button type="button" data-tab="write"><span>✍️</span>쓰기</button>
+      <button type="button" data-open="show"><span>🎬</span>공개</button>
+      <button type="button" data-open="invite"><span>📨</span>초대</button>
+    </nav>
+  </main>
+
+  <!-- 컨테이너가 꺼졌거나 세션이 끝났을 때 -->
+  <main id="offline" class="offline" hidden>
+    <p class="big-emoji">🌙</p>
+    <h1 id="offline-title">서비스가 쉬고 있어요</h1>
+    <p id="offline-text">실습용 컨테이너가 꺼져 있거나 1시간 실습 시간이 끝났어요.</p>
+    <button type="button" class="primary" id="retry">다시 연결해 보기</button>
+  </main>
+
+  <footer class="foot">
+    <span id="service-left"></span>
+    <a id="switch-ui" href="#"></a>
+  </footer>
+
+  <!-- 초대 -->
+  <dialog id="invite" class="dialog" aria-labelledby="invite-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="invite-title">팀원 초대하기</h2>
+      <p class="hint">QR을 찍거나 링크를 단톡방에 공유하세요. 폰으로 열면 모바일 화면으로 자동 전환돼요.</p>
+      <img id="qr" class="qr" alt="보드 주소 QR 코드" width="220" height="220">
+      <div class="copy-row">
+        <input id="invite-link" readonly aria-label="초대 링크">
+        <button type="button" class="primary" data-copy="invite-link">링크 복사</button>
+      </div>
+      <button type="button" id="share" class="ghost" hidden>📤 공유하기</button>
+      <div id="admin-link-box" class="admin-box" hidden>
+        <h3>🛠 관리자 링크 (나만 보관)</h3>
+        <p class="hint">글 삭제·마감·CSV 저장이 가능한 링크예요. 주인공이나 팀원에게 보내지 마세요.</p>
+        <div class="copy-row">
+          <input id="admin-link" readonly aria-label="관리자 링크">
+          <button type="button" class="ghost" data-copy="admin-link">복사</button>
+        </div>
+      </div>
+      <button class="close" value="close" aria-label="닫기">✕</button>
+    </form>
+  </dialog>
+
+  <!-- 관리 -->
+  <dialog id="admin" class="dialog" aria-labelledby="admin-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="admin-title">🛠 보드 관리</h2>
+      <p class="hint">관리자 링크로 연 브라우저에서만 보여요. 부적절한 글은 포스트잇의 🗑 버튼으로 지울 수 있어요.</p>
+      <div class="admin-actions">
+        <button type="button" class="primary" id="close-now">⏰ 지금 마감하고 공개하기</button>
+        <button type="button" class="ghost" id="extend">➕ 마감 10분 연장</button>
+        <button type="button" class="ghost" id="export">⬇️ CSV로 내려받기</button>
+      </div>
+      <button class="close" value="close" aria-label="닫기">✕</button>
+    </form>
+  </dialog>
+
+  <!-- 확인 -->
+  <dialog id="confirm" class="dialog small" aria-labelledby="confirm-title">
+    <form method="dialog" class="dialog-body">
+      <h2 id="confirm-title">확인</h2>
+      <p id="confirm-text"></p>
+      <div class="dialog-actions">
+        <button value="cancel" class="ghost">취소</button>
+        <button value="ok" class="danger">확인</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 공개 모드 슬라이드쇼 -->
+  <div id="show" class="show" role="dialog" aria-modal="true" aria-label="공개 모드" hidden>
+    <div class="show-top">
+      <span id="show-title"></span>
+      <span id="show-count"></span>
+      <button type="button" id="show-play" class="ghost light">⏸ 멈춤</button>
+      <button type="button" id="show-close" class="ghost light" aria-label="공개 모드 닫기">✕</button>
+    </div>
+    <div id="show-stage" class="show-stage"></div>
+    <div class="show-nav">
+      <button type="button" id="show-prev" class="ghost light" aria-label="이전">‹</button>
+      <div id="show-bar" class="show-bar"><span></span></div>
+      <button type="button" id="show-next" class="ghost light" aria-label="다음">›</button>
+    </div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <div id="fx" class="fx" aria-hidden="true"></div>
+</body>
+</html>

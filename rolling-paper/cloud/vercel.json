@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- .",
+  "functions": {
+    "api/proxy.js": { "maxDuration": 25 }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/proxy?path=" },
+    { "source": "/:path*", "destination": "/api/proxy?path=:path*" }
+  ]
+}
